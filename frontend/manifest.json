@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "My React Extension",
+  "version": "1.0.0",
+  "description": "Chrome Extension with React",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": [],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"]
+    }
+  ]
+}
