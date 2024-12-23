@@ -28,3 +28,14 @@ A Chrome Extension that is able to process all the classroom content and classif
   - Processed classroom Information
   - saved chats
 - Chatbot responses
+
+## Step to run the extension
+
+- In terminal go to the frontend folder
+- run command `npm run build`
+- a dist folder will be created
+- open your browser and go to `brave://extension` or `chrome://extension`
+- turn on the developer mode on the right (most probably)
+- click on load unpack and select the dist file that was generated when you ran npm run build command.
+- this will install the extension onto your browser.
+- You can now open the popup and also content script will be injected according to matched url.
