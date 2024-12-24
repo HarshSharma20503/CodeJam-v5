@@ -16,6 +16,15 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    batch: {
+      type: String,
+      required: true,
+    },
+    branch: {
+      type: String,
+      required: true,
+      enum: ["CSE", "ECE", "IT", "MECH"],
+    },
   },
   { timestamps: true }
 );
