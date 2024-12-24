@@ -6,9 +6,9 @@ import { generateJWTToken } from "../utils/GenerateJWT.js";
 
 export const registerUser = AsyncHandler(async (req, res) => {
   console.log("******** registerUser Function ********");
-  const { name, email, password } = req.body;
+  const { name, email, password, batch, branch } = req.body;
 
-  if (!name || !email || !password) {
+  if (!name || !email || !password || !batch || !branch) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -23,7 +23,7 @@ export const registerUser = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Email must be a valid @mail.jiit.ac.in address");
   }
 
-  const newUser = await User.create({ name, email, password });
+  const newUser = await User.create({ name, email, password, batch, branch });
   if (!newUser) {
     throw new ApiError(500, "Failed to create User");
   }
@@ -37,6 +37,8 @@ export const registerUser = AsyncHandler(async (req, res) => {
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
+        batch: newUser.batch,
+        branch: newUser.branch,
         token: jwtToken,
       },
       "User logged in successfully"
