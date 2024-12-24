@@ -1,0 +1,175 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Jost', sans-serif;
+    background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+}
+
+.main {
+    width: 350px;
+    height: 500px;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+    border-radius: 10px;
+    box-shadow: 5px 20px 50px #000;
+}
+
+.signup, .login {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s ease-in-out;
+}
+
+h1 {
+    color: #fff;
+    font-size: 2.3em;
+    justify-content: center;
+    display: flex;
+    margin: 60px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.5s ease-in-out;
+}
+
+input {
+    width: 60%;
+    height: 20px;
+    background: #e0dede;
+    justify-content: center;
+    display: flex;
+    margin: 20px auto;
+    padding: 10px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+}
+
+button {
+    width: 60%;
+    height: 40px;
+    margin: 10px auto;
+    justify-content: center;
+    display: block;
+    color: #fff;
+    background: #573b8a;
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 20px;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    transition: background 0.2s ease-in;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #6d44b8;
+}
+
+.login {
+    height: 460px;
+    background: #eee;
+    border-radius: 60% / 10%;
+    transform: translateY(-180px);
+}
+
+.signup.active {
+    transform: translateY(0);
+}
+
+.login.active {
+    transform: translateY(-500px);
+}
+
+.l2 {
+    color: #573b8a;
+    transform: scale(0.6);
+}
+
+.l1 {
+    transform: scale(1);
+}
+
+@media (max-width: 768px) {
+    .main {
+        width: 300px;
+        height: 450px;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin: 50px;
+    }
+
+    input {
+        width: 70%;
+    }
+
+    button {
+        width: 70%;
+        font-size: 0.9em;
+    }
+
+    .login {
+        height: 420px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main {
+        width: 260px;
+        height: 400px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+        margin: 40px;
+    }
+
+    input {
+        width: 80%;
+    }
+
+    button {
+        width: 80%;
+        font-size: 0.8em;
+    }
+
+    .login {
+        height: 380px;
+    }
+}
+input {
+    width: 70%; /* Slightly wider input boxes */
+    height: 40px; /* Increased height */
+    background: #f0f0f0; /* Softer background color */
+    color: #333; /* Darker text color for better readability */
+    justify-content: center;
+    display: flex;
+    margin: 20px auto;
+    padding: 10px;
+    border: 1px solid #ccc; /* Added subtle border */
+    outline: none;
+    border-radius: 8px; /* Slightly more rounded corners */
+    font-size: 1em; /* Larger font size */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added a subtle shadow */
+    transition: box-shadow 0.3s ease;
+}
+
+input:focus {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Highlight effect on focus */
+    border-color: #573b8a; /* Highlight the border on focus */
+}
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(to top, #141e30, #243b55);
+}
