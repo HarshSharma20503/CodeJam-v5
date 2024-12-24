@@ -21,16 +21,7 @@
     "tabs",
     "webNavigation"
   ],
-  "host_permissions": [
-    "https://classroom.google.com/c/*",
-    "http://*/*",
-    "https://*/*",
-    "https://drive.google.com/*",
-    "https://*.google.com/*",
-    "https://*.googleapis.com/*",
-    "https://*.usercontent.google.com/*",
-    "http://localhost:8000/*"
-  ],
+  "host_permissions": ["<all_urls>", "*://localhost/*"],
   "background": {
     "service_worker": "background.js"
   },
@@ -41,6 +32,6 @@
     }
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://* http://*;"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src * data: blob: filesystem:;"
   }
 }

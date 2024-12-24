@@ -14,21 +14,6 @@ export const getDownloadLink = (fileId) => {
   return `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
 };
 
-export const downloadFile = async (url, filename) => {
-  try {
-    // Open the file in a new window/tab
-    // This will use the user's existing Google authentication
-    window.open(url, "_blank");
-
-    // Show a message to the user
-    console.log("Please use the Google Drive interface to download the file");
-    return true;
-  } catch (error) {
-    console.error("Error opening file:", error);
-    return false;
-  }
-};
-
 export const getDriveLinks = () => {
   const elements = document.getElementsByClassName(
     "qhnNic LBlAUc Aopndd TIunU"
