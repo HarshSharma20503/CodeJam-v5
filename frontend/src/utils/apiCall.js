@@ -4,10 +4,10 @@ import axios from "axios";
 const handleApiError = (error) => {
   if (error.response.data.message) {
     if (error.response.data.message === "Unauthorized Access") {
-      localStorage.removeItem("userInfo");
+      localStorage.removeItem("token");
       toast.error("Please Login Again");
       setTimeout(() => {
-        window.location.href = "/login";
+        window.location.href = "/auth";
       }, 1000);
     } else {
       toast.error(error.response.data.message);

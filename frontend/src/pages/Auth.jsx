@@ -1,17 +1,22 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+import { PostApiCall } from "../utils/apiCall";
+import { setItem } from "../utils/storage";
+import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
+  const navigete = useNavigate();
+
   const [isSignup, setIsSignup] = useState(false);
   const [signupForm, setSignupForm] = useState({
-    username: "",
+    name: "",
     email: "",
     password: "",
     batch: "",
     branch: "",
   });
   const [loginForm, setLoginForm] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
@@ -47,20 +52,42 @@ const Auth = () => {
     }));
   };
 
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
     // Validate required fields
     if (!signupForm.batch || !signupForm.branch) {
-      alert("Please select both batch and branch");
+      toast.error("Please select both batch and branch");
       return;
     }
     console.log("Signup Form Data:", signupForm);
+    const data = await PostApiCall(
+      "http://localhost:8000/api/auth/signup",
+      signupForm
+    );
+    console.log("Signup Response:", data);
+    if (data.success) {
+      setItem("token", data.data.token);
+      toast.success("Signup Successful");
+      navigete("/home");
+    }
   };
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     console.log("Login Form Data:", loginForm);
     toast.success("Login Successful");
+
+    // Redirect to home page
+    const data = await PostApiCall(
+      "http://localhost:8000/api/auth/login",
+      loginForm
+    );
+    console.log("Login Response:", data);
+    if (data.success) {
+      setItem("token", data.data.token);
+      toast.success("Login Successful");
+      navigete("/home");
+    }
   };
 
   return (
@@ -80,11 +107,12 @@ const Auth = () => {
           </h1>
           <input
             type="text"
-            name="username"
-            value={signupForm.username}
+            name="name"
+            value={signupForm.name}
             onChange={handleSignupChange}
-            placeholder="Username"
+            placeholder="Name"
             className="w-[250px] h-10 bg-gray-100 mx-auto block px-4 rounded-lg mb-4 border border-gray-300 outline-none focus:shadow-md focus:border-[#573b8a] transition-shadow duration-300 text-sm"
+            required={true}
           />
           <input
             type="email"
@@ -93,12 +121,14 @@ const Auth = () => {
             onChange={handleSignupChange}
             placeholder="Email"
             className="w-[250px] h-10 bg-gray-100 mx-auto block px-4 rounded-lg mb-4 border border-gray-300 outline-none focus:shadow-md focus:border-[#573b8a] transition-shadow duration-300 text-sm"
+            required={true}
           />
           <select
             name="batch"
             value={signupForm.batch}
             onChange={handleSignupChange}
             className="w-[250px] h-10 bg-gray-100 mx-auto block px-4 rounded-lg mb-4 border border-gray-300 outline-none focus:shadow-md focus:border-[#573b8a] transition-shadow duration-300 text-sm appearance-none cursor-pointer"
+            required={true}
           >
             <option value="">Select Batch</option>
             {batchOptions.map((batch) => (
@@ -112,6 +142,7 @@ const Auth = () => {
             value={signupForm.branch}
             onChange={handleSignupChange}
             className="w-[250px] h-10 bg-gray-100 mx-auto block px-4 rounded-lg mb-4 border border-gray-300 outline-none focus:shadow-md focus:border-[#573b8a] transition-shadow duration-300 text-sm appearance-none cursor-pointer"
+            required={true}
           >
             <option value="">Select Branch</option>
             {branchOptions.map((branch) => (
@@ -127,6 +158,7 @@ const Auth = () => {
             onChange={handleSignupChange}
             placeholder="Password"
             className="w-[250px] h-10 bg-gray-100 mx-auto block px-4 rounded-lg mb-4 border border-gray-300 outline-none focus:shadow-md focus:border-[#573b8a] transition-shadow duration-300 text-sm"
+            required={true}
           />
           <button
             type="submit"
@@ -144,16 +176,18 @@ const Auth = () => {
           <h1
             onClick={toggleForm}
             className="text-[#573b8a] text-3xl flex justify-center mt-8 mb-6 font-bold cursor-pointer transition-transform duration-500 ease-in-out hover:scale-110"
+            required={true}
           >
             Login
           </h1>
           <input
-            type="text"
-            name="username"
-            value={loginForm.username}
+            type="email"
+            name="email"
+            value={loginForm.email}
             onChange={handleLoginChange}
-            placeholder="Username"
+            placeholder="email"
             className="w-[250px] h-10 bg-gray-100 mx-auto block px-4 rounded-lg mb-4 border border-gray-300 outline-none focus:shadow-md focus:border-[#573b8a] transition-shadow duration-300 text-sm"
+            required={true}
           />
           <input
             type="password"
@@ -162,10 +196,12 @@ const Auth = () => {
             onChange={handleLoginChange}
             placeholder="Password"
             className="w-[250px] h-10 bg-gray-100 mx-auto block px-4 rounded-lg mb-4 border border-gray-300 outline-none focus:shadow-md focus:border-[#573b8a] transition-shadow duration-300 text-sm"
+            required={true}
           />
           <button
             type="submit"
             className="w-[250px] h-10 mx-auto block text-white bg-[#573b8a] text-sm font-bold mt-4 rounded-lg transition-colors duration-200 hover:bg-[#6d44b8] cursor-pointer"
+            required={true}
           >
             Login
           </button>
