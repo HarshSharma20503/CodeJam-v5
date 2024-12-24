@@ -1,8 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 
-const chatSchema = new Schema(
+const noteSchema = new Schema(
     {
-        chats: {
+        notes: {
                 type: [String],
                 required: true,
         },
@@ -24,4 +24,4 @@ const chatSchema = new Schema(
 
 
 
-export const Chat = mongoose.model("Chat", chatSchema);
+export const Note = mongoose.model("Note", noteSchema);
