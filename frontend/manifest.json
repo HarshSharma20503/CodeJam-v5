@@ -6,14 +6,37 @@
   "action": {
     "default_popup": "index.html"
   },
-  "permissions": [],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "cookies",
+    "webRequest",
+    "notifications",
+    "clipboardWrite",
+    "clipboardRead",
+    "bookmarks",
+    "history",
+    "downloads",
+    "tabs",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "https://classroom.google.com/c/*",
+    "http://*/*",
+    "https://*/*",
+    "https://drive.google.com/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["https://classroom.google.com/c/*"],
       "js": ["content-script.js"]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://* http://*;"
+  }
 }

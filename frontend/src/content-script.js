@@ -1,7 +1,17 @@
 // content-script.js
+import {
+  createButton,
+  createStatusDiv,
+  updateStatus,
+} from "./scripts/ui-utils.js";
+import {
+  getFileId,
+  getDownloadLink,
+  getDriveLinks,
+} from "./scripts/drive-utils.js";
+import { downloadFile } from "./scripts/file-utils.js";
 
 const init = () => {
-  // Check if root already exists
   if (document.getElementById("my-extension-root")) return;
 
   // Create root div
@@ -9,27 +19,61 @@ const init = () => {
   root.id = "my-extension-root";
   document.body.appendChild(root);
 
-  // Create content div with styles
-  const contentDiv = document.createElement("div");
+  // Create UI elements
+  const statusDiv = createStatusDiv();
+  const button = createButton();
 
-  // Apply styles
-  Object.assign(contentDiv.style, {
-    position: "fixed",
-    top: "10px",
-    right: "10px",
-    zIndex: "999999",
-    background: "white",
-    padding: "10px",
-    border: "1px solid black",
+  // Add click event handler
+  button.addEventListener("click", async () => {
+    const anchorTags = getDriveLinks();
+    updateStatus(statusDiv, `Found ${anchorTags.length} files to process`);
+
+    console.log(anchorTags);
+
+    // Process files sequentially
+    for (let i = 0; i < anchorTags.length; i++) {
+      const { href, text } = anchorTags[i];
+
+      const fileId = getFileId(href);
+
+      console.log("href", href);
+      console.log("text", text);
+      console.log("fileId", fileId);
+
+      if (fileId) {
+        updateStatus(
+          statusDiv,
+          `Processing file ${i + 1} of ${anchorTags.length}: ${text}`
+        );
+        const downloadUrl = getDownloadLink(fileId);
+        console.log("downloadUrl", downloadUrl);
+        const filename = `file_${fileId}.pdf`;
+        return;
+        try {
+          await downloadFile(downloadUrl, filename);
+          updateStatus(
+            statusDiv,
+            `Successfully processed ${i + 1} of ${anchorTags.length} files`
+          );
+        } catch (error) {
+          updateStatus(
+            statusDiv,
+            `Error processing file ${i + 1}: ${error.message}`
+          );
+        }
+      }
+      break;
+    }
+
+    // updateStatus(statusDiv, "All files processed");
+    // setTimeout(() => {
+    //   statusDiv.style.display = "none";
+    // }, 3000);
   });
 
-  // Create and append h1
-  const heading = document.createElement("h1");
-  heading.textContent = "Hello, world!";
-  contentDiv.appendChild(heading);
-
-  // Append content div to root
-  root.appendChild(contentDiv);
+  // Append elements to root
+  root.appendChild(statusDiv);
+  root.appendChild(button);
 };
 
 // Run initialization
