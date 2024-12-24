@@ -7,27 +7,23 @@ const lectureSchema = new Schema(
       required: true,
     },
     course: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     link: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     batch: {
-        type : String,
-        required: true,
+      type: String,
+      required: true,
     },
     branch: {
-        type : String,
-        required: true,
+      type: String,
+      required: true,
     },
   },
   { timestamps: true }
 );
-
-
-
-
 
 export const Lecture = mongoose.model("Lecture", lectureSchema);

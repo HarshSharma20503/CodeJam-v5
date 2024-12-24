@@ -41,7 +41,7 @@ export const registerUser = AsyncHandler(async (req, res) => {
         branch: newUser.branch,
         token: jwtToken,
       },
-      "User logged in successfully"
+      "User Sign in successfull"
     )
   );
 });
