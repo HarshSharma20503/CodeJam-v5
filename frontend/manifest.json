@@ -25,7 +25,11 @@
     "https://classroom.google.com/c/*",
     "http://*/*",
     "https://*/*",
-    "https://drive.google.com/*"
+    "https://drive.google.com/*",
+    "https://*.google.com/*",
+    "https://*.googleapis.com/*",
+    "https://*.usercontent.google.com/*",
+    "http://localhost:8000/*"
   ],
   "background": {
     "service_worker": "background.js"

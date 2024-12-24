@@ -5,6 +5,7 @@ import UserRouter from "./routes/userRoutes.js";
 import NoteRouter from "./routes/noteRoutes.js";
 import tagRotuer from "./routes/tagRoutes.js";
 import chatRouter from "./routes/chatRoutes.js";
+import { upload } from "./middleware/multer.js";
 
 const app = express();
 
@@ -14,6 +15,23 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
+});
+
+app.post("/upload", upload.single("file"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    // Send success response
+    res.status(200).json({
+      message: "File uploaded successfully",
+      filename: req.file.filename,
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ error: "Error uploading file" });
+  }
 });
 
 app.use("/api/auth", AuthRouter);

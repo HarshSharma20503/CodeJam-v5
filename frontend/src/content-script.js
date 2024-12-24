@@ -1,4 +1,3 @@
-// content-script.js
 import {
   createButton,
   createStatusDiv,
@@ -26,7 +25,7 @@ const init = () => {
   // Add click event handler
   button.addEventListener("click", async () => {
     const anchorTags = getDriveLinks();
-    updateStatus(statusDiv, `Found ${anchorTags.length} files to process`);
+    updateStatus(statusDiv, ` Found ${anchorTags.length} files to process`);
 
     console.log(anchorTags);
 
@@ -47,14 +46,14 @@ const init = () => {
         );
         const downloadUrl = getDownloadLink(fileId);
         console.log("downloadUrl", downloadUrl);
-        const filename = `file_${fileId}.pdf`;
-        return;
+
         try {
-          await downloadFile(downloadUrl, filename);
+          await downloadFile(downloadUrl, text);
           updateStatus(
             statusDiv,
             `Successfully processed ${i + 1} of ${anchorTags.length} files`
           );
+          return;
         } catch (error) {
           updateStatus(
             statusDiv,

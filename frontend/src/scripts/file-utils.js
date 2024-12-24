@@ -1,27 +1,20 @@
 export const downloadFile = async (url, filename) => {
   try {
-    const response = await fetch(url);
-    const blob = await response.blob();
+    // Send message to background script to handle download
+    const response = await chrome.runtime.sendMessage({
+      action: "download",
+      url: url,
+      filename: filename,
+    });
 
-    // Create download link
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = filename;
-
-    // Trigger download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(downloadUrl);
-
-    // Send to server
-    await sendToServer(blob, filename);
+    if (!response.success) {
+      throw new Error(response.error || "Download failed");
+    }
 
     return true;
   } catch (error) {
     console.error(`Error downloading ${filename}:`, error);
-    return false;
+    throw error;
   }
 };
 
@@ -30,7 +23,7 @@ export const sendToServer = async (blob, filename) => {
     const formData = new FormData();
     formData.append("file", blob, filename);
 
-    const response = await fetch("YOUR_SERVER_URL", {
+    const response = await fetch("http://localhost:8000/upload", {
       method: "POST",
       body: formData,
     });

@@ -1,15 +1,30 @@
-// Listen for messages from content script or popup
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  // Log the message and sender information
-  console.log("Message received:", message);
-  console.log("Sender:", sender);
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "download") {
+    console.log("Received download request", request);
+    chrome.downloads.download(
+      {
+        url: request.url,
+        filename: request.filename,
+        saveAs: false,
+      },
+      (downloadId) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError });
+          return;
+        }
 
-  // If you want to send a response back
-  sendResponse({ received: true });
+        // Listen for download completion
+        chrome.downloads.onChanged.addListener(function downloadListener(
+          delta
+        ) {
+          if (delta.id === downloadId && delta.state?.current === "complete") {
+            chrome.downloads.onChanged.removeListener(downloadListener);
+            sendResponse({ success: true, downloadId });
+          }
+        });
+      }
+    );
 
-  // Return true if you're going to send a response asynchronously
-  return true;
+    return true;
+  }
 });
-
-// Log when the background script loads
-console.log("Background script loaded!");
