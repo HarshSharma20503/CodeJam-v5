@@ -2,40 +2,99 @@
 
 ## Basic Idea
 
-A Chrome Extension that is able to process all the classroom content and classify it accordingly into lectures, assignment and annoucements section. Ability to add tags enabling user to classify and filter according to the difficult of lecture and Exams(T1, T2, T3). Chatbot feature from which you can ask to summarise, clear your doubts accordingly related to the lecture.
+A Chrome Extension that processes all classroom content and classifies it into lectures, assignments, and announcements sections. It also allows users to add tags for classification and filtering based on lecture difficulty and exams (T1, T2, T3). Additionally, a chatbot feature is included, which can summarize content, clear doubts, and assist with lecture-related queries.
 
-## Expected Tech Stack
+## Tech Stack
 
-- React for frontend components
-- Tailwind for styling
-- Vite and Vite's CRXJS plugin for build tools and configuration.
-- Express and Node for backend
-- MongoDB for Database
-- Langchain for RAG based Chatbot using Gemini API.
+- **React**: Frontend components
+- **Tailwind CSS**: Styling
+- **Vite with Vite's CRXJS plugin**: Build tools and configuration
+- **Express and Node.js**: Backend
+- **MongoDB**: Database
+- **Langchain**: RAG-based Chatbot using Gemini API
 
 ## Expected Frontend Screens
 
-- Sign Up Screen
-- Login Screen
+- Sign-Up and Login Screen
 - Home Screen
-- Classroom Screen
-- ChatBot Screen
+- Lecture Screen
+- Chatbot Screen
 
 ## Expected Backend Functionality
 
-- Login and Signup routes
-- User Information routes
-  - Processed classroom Information
-  - saved chats
-- Chatbot responses
+- **Authentication Routes**: Login and Sign-Up
+- **User Information Routes**:
+  - Processed classroom information
+  - Saved chats
+- **Chatbot Functionality**: Provide responses
 
-## Step to run the extension
+## Steps to Run the Project
 
-- In terminal go to the frontend folder
-- run command `npm run build`
-- a dist folder will be created
-- open your browser and go to `brave://extension` or `chrome://extension`
-- turn on the developer mode on the right (most probably)
-- click on load unpack and select the dist file that was generated when you ran npm run build command.
-- this will install the extension onto your browser.
-- You can now open the popup and also content script will be injected according to matched url.
+### 1. Clone the Repository
+
+Run the following command in your terminal to clone the repository locally:
+
+```bash
+git clone https://github.com/HarshSharma20503/CodeJam-v5.git
+```
+
+Now navigate to the project using the following command:
+
+```bash
+cd CODEJAM-V5
+```
+
+### 2. Set Up the Backend
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Create a `.env` file in the backend directory:
+   ```bash
+   touch .env
+   ```
+3. Copy the contents of the `.env.example` file into `.env`.
+4. Set up a MongoDB server and obtain the `Mongo_URI`. Paste the URI into the `.env` file.
+5. Ensure the `.env` file contains the following:
+   - `Mongo_URI`: MongoDB connection string
+   - `PORT`: 8000
+   - `JWT_SECRET`: exampleSecret
+6. Start the backend server:
+   ```bash
+   npm run dev
+   ```
+
+### 3. Set Up the Frontend
+
+1. Open a new terminal and navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Build the frontend to create the `dist` folder:
+   ```bash
+   npm run build
+   ```
+
+### 4. Add the Extension to the Browser
+
+1. Open your browser and navigate to the extensions page:
+   - For Chrome: `chrome://extensions`
+   - For Brave: `brave://extensions`
+2. Enable **Developer Mode** (usually found in the top right corner).
+3. Click on **Load Unpacked**.
+4. Select the `dist` folder generated in the frontend directory.
+5. The extension is now added and ready to use.
+
+### 5. Using the Extension
+
+1. Sign up with an email that uses the `@mail.jiit.ac.in` domain.
+2. Log in and start using the extension features.
+
+---
+
+## Notes
+
+- Ensure both the frontend and backend servers are running.
+- The backend runs on port 8000 by default. Ensure there are no conflicts.
+- For troubleshooting, ensure MongoDB is running and accessible.
