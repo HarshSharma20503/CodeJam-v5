@@ -5,11 +5,13 @@ const Homepage = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [hasCourses, setHasCourses] = useState(true);
+  const [courses, setCourses] = useState([]);
 
   const fetchData = async () => {
     try {
       const response = await GetApiCall("http://localhost:8000/api/user/");
+      console.log("getUser response", response);
+      setCourses(response.data.courses);
       setData(response);
     } catch (err) {
       setError(err.message);
@@ -41,7 +43,7 @@ const Homepage = () => {
   return (
     <div className="h-full bg-slate-700">
       {/* Instructions Component Start */}
-      {hasCourses === false && (
+      {courses.length === 0 && (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e]">
           <div className="w-[400px] h-[600px] bg-gradient-to-b from-[#1e1e2f] via-[#302b63] to-[#24243e] shadow-lg flex flex-col overflow-hidden">
             <div className="flex items-center gap-4 p-4 bg-[#302b63] text-white border-b border-white/20">
@@ -83,8 +85,7 @@ const Homepage = () => {
       {/* Insrtuctions Component End */}
 
       {/* Classrooms Component Start */}
-
-      {hasCourses === true && (
+      {courses.length > 0 && (
         <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white font-sans">
           <div className="w-[400px] h-[600px] bg-gradient-to-b from-[#1e1e2f] via-[#302b63] to-[#24243e] shadow-lg flex flex-col overflow-hidden">
             {/* Header Section */}
@@ -95,13 +96,14 @@ const Homepage = () => {
 
             {/* Classroom List Section */}
             <div className="flex-1 p-5 overflow-y-auto space-y-5">
-              <div className="h-12 flex items-center px-4 bg-[#302b63] rounded-lg text-white shadow-md transition-transform duration-300 transform hover:scale-105 hover:bg-[#bfad45] hover:text-black">
-                SDF - 1 LAB
-              </div>
-              <div className="h-12 flex items-center px-4 bg-[#302b63] rounded-lg text-white shadow-md transition-transform duration-300 transform hover:scale-105 hover:bg-[#bfad45] hover:text-black"></div>
-              <div className="h-12 flex items-center px-4 bg-[#302b63] rounded-lg text-white shadow-md transition-transform duration-300 transform hover:scale-105 hover:bg-[#bfad45] hover:text-black"></div>
-              <div className="h-12 flex items-center px-4 bg-[#302b63] rounded-lg text-white shadow-md transition-transform duration-300 transform hover:scale-105 hover:bg-[#bfad45] hover:text-black"></div>
-              <div className="h-12 flex items-center px-4 bg-[#302b63] rounded-lg text-white shadow-md transition-transform duration-300 transform hover:scale-105 hover:bg-[#bfad45] hover:text-black"></div>
+              {courses.map((course, index) => (
+                <div
+                  key={index}
+                  className="h-12 flex items-center px-4 bg-[#302b63] rounded-lg text-white shadow-md transition-transform duration-300 transform hover:scale-105 hover:bg-[#bfad45] hover:text-black"
+                >
+                  {course.name}
+                </div>
+              ))}
             </div>
           </div>
         </div>

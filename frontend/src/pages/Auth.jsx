@@ -75,7 +75,6 @@ const Auth = () => {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     console.log("Login Form Data:", loginForm);
-    toast.success("Login Successful");
 
     // Redirect to home page
     const data = await PostApiCall(

@@ -15,6 +15,8 @@ export const postLecture = AsyncHandler(async (req, res) => {
 
   console.log("req.file: ", req.file);
 
+  console.log("req.body:", JSON.stringify(req.body));
+
   const objectKey = req.body.course + req.file.originalname;
 
   const url = await uploadToS3(
