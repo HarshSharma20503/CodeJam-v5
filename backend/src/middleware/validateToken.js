@@ -5,13 +5,26 @@ import jwt from "jsonwebtoken";
 
 export const validateToken = AsyncHandler(async (req, res, next) => {
   try {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
+    let token = req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
       throw new ApiError(401, "Unauthorized request");
     }
 
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Before decoded token", process.env.JWT_SECRET);
+    let decodedToken;
+
+    if (token.charAt(0) === '"' && token.charAt(token.length - 1) === '"')
+      token = token.slice(1, -1);
+
+    console.log("token", token);
+    try {
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      console.log("error", error);
+    }
+
+    console.log("decodedToken", decodedToken);
 
     const user = await User.findById(decodedToken?._id).select("-password");
 

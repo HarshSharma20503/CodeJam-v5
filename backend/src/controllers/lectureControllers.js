@@ -4,7 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { Lecture } from "../models/lectureModel.js";
 
 export const getLecture = AsyncHandler(async (req, res) => {
-    console.log("******** getUserData Function ********");
+  console.log("******** getUserData Function ********");
   const user = req.user;
   const batch = user.batch;
   const branch = user.branch;
@@ -28,26 +28,26 @@ export const getLecture = AsyncHandler(async (req, res) => {
 });
 
 export const postLecture = AsyncHandler(async (req, res) => {
-    console.log("******** postLecture Function ********");
-    const user = req.user;
-    const { lectures, course, link, batch, branch } = req.body;
+  console.log("******** postLecture Function ********");
+  const user = req.user;
+  const { lectures, course, link, batch, branch } = req.body;
 
-    const lecture = await Lecture.create({
-        userId: user._id,
-        lectures,
-        course,
-        link,
-        batch,
-        branch,
-    });
+  const lecture = await Lecture.create({
+    userId: user._id,
+    lectures,
+    course,
+    link,
+    batch,
+    branch,
+  });
 
-    return res.status(201).json(
-        new ApiResponse(
-        201,
-        {
-            lecture,
-        },
-        "lecture created successfully"
-        )
-    );
+  return res.status(201).json(
+    new ApiResponse(
+      201,
+      {
+        lecture,
+      },
+      "lecture created successfully"
+    )
+  );
 });

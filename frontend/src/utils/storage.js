@@ -1,15 +1,38 @@
-// Function to create or update data in localStorage
+// Function to create or update data in chrome.storage.local
 export function setItem(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ [key]: value }, () => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve();
+      }
+    });
+  });
 }
 
-// Function to read data from localStorage
+// Function to read data from chrome.storage.local
 export function getItem(key) {
-  const value = localStorage.getItem(key);
-  return value ? JSON.parse(value) : null;
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get([key], (result) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(result[key] || null);
+      }
+    });
+  });
 }
 
-// Function to remove data from localStorage
+// Function to remove data from chrome.storage.local
 export function removeItem(key) {
-  localStorage.removeItem(key);
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.remove(key, () => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve();
+      }
+    });
+  });
 }

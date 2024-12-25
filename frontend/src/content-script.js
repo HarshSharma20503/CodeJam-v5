@@ -10,7 +10,7 @@ import {
 } from "./scripts/drive-utils.js";
 import { downloadFile } from "./scripts/file-utils.js";
 
-const init = () => {
+const init = async () => {
   if (document.getElementById("my-extension-root")) return;
 
   // Create root div
@@ -22,57 +22,81 @@ const init = () => {
   const statusDiv = createStatusDiv();
   const button = createButton();
 
-  // Add click event handler
-  button.addEventListener("click", async () => {
-    const anchorTags = getDriveLinks();
-    updateStatus(statusDiv, ` Found ${anchorTags.length} files to process`);
+  // get user authentication and details
 
-    console.log(anchorTags);
+  const getUser = async () => {
+    try {
+      console.log("getUser function called");
 
-    // Process files sequentially
-    for (let i = 0; i < anchorTags.length; i++) {
-      const { href, text } = anchorTags[i];
+      const response = await chrome.runtime.sendMessage({
+        action: "getUser",
+      });
 
-      const fileId = getFileId(href);
-
-      console.log("href", href);
-      console.log("text", text);
-      console.log("fileId", fileId);
-
-      if (fileId) {
-        updateStatus(
-          statusDiv,
-          `Processing file ${i + 1} of ${anchorTags.length}: ${text}`
-        );
-        const downloadUrl = getDownloadLink(fileId);
-        console.log("downloadUrl", downloadUrl);
-
-        try {
-          await downloadFile(downloadUrl, text);
-          updateStatus(
-            statusDiv,
-            `Successfully processed ${i + 1} of ${anchorTags.length} files`
-          );
-          return;
-        } catch (error) {
-          updateStatus(
-            statusDiv,
-            `Error processing file ${i + 1}: ${error.message}`
-          );
-        }
+      if (!response.success) {
+        throw new Error(response.error || "User not found");
       }
-      break;
+      console.log("response", response);
+      return response.user;
+    } catch (error) {
+      console.error("Error getting user:", error);
+      return null;
     }
+  };
 
-    // updateStatus(statusDiv, "All files processed");
-    // setTimeout(() => {
-    //   statusDiv.style.display = "none";
-    // }, 3000);
-  });
+  // Get user details
+  const user = await getUser();
+  console.log("user in content script", user);
 
-  // Append elements to root
-  root.appendChild(statusDiv);
-  root.appendChild(button);
+  // button.addEventListener("click", async () => {
+  //   const anchorTags = getDriveLinks();
+  //   updateStatus(statusDiv, ` Found ${anchorTags.length} files to process`);
+
+  //   console.log(anchorTags);
+
+  //   // Process files sequentially
+  //   for (let i = 0; i < anchorTags.length; i++) {
+  //     const { href, text } = anchorTags[i];
+
+  //     const fileId = getFileId(href);
+
+  //     console.log("href", href);
+  //     console.log("text", text);
+  //     console.log("fileId", fileId);
+
+  //     if (fileId) {
+  //       updateStatus(
+  //         statusDiv,
+  //         `Processing file ${i + 1} of ${anchorTags.length}: ${text}`
+  //       );
+  //       const downloadUrl = getDownloadLink(fileId);
+  //       console.log("downloadUrl", downloadUrl);
+
+  //       try {
+  //         await downloadFile(downloadUrl, text);
+  //         updateStatus(
+  //           statusDiv,
+  //           `Successfully processed ${i + 1} of ${anchorTags.length} files`
+  //         );
+  //         return;
+  //       } catch (error) {
+  //         updateStatus(
+  //           statusDiv,
+  //           `Error processing file ${i + 1}: ${error.message}`
+  //         );
+  //       }
+  //     }
+  //     break;
+  //   }
+
+  //   updateStatus(statusDiv, "All files processed");
+  //   setTimeout(() => {
+  //     statusDiv.style.display = "none";
+  //   }, 3000);
+  // });
+
+  // // Append elements to root
+  // root.appendChild(statusDiv);
+  // root.appendChild(button);
 };
 
 // Run initialization
