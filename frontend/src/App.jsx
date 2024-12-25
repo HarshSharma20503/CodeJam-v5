@@ -5,14 +5,16 @@ import Classes from "./pages/Classes"; // Import the Classes component
 import Lecture from "./pages/Lecture";
 import Instructions from "./pages/instructions"
 
+
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/classes" element={<Classes />} /> {/* Add this route */}
-        <Route path="/lecture" element={<Lecture />} />
+        <Route path="/Lecture" element={<Lecture />} />
         <Route path="/Instructions" element ={<Instructions />} />
+  
       </Routes>
     </Router>
   );
