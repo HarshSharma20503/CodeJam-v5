@@ -48,10 +48,12 @@ A Chrome Extension that processes all classroom content and classifies it into l
 #### Demo Videos
 
 `Description of the Video`: Ability of the extension to process and save data to backend and display it on the popup screen of extension.
-<video controls src="Classroom Stalker.mp4" title="Title"></video>
+
+`Video Link`: https://github.com/HarshSharma20503/CodeJam-v5/blob/main/Classroom%20Stalker.mp4
 
 `Description of the Video`: Sign up for first user, only users with `@mail.jiit.ac.in` are allowed. If no course are processed. It wiil show you instructions as to how to process them.
-<video controls src="signup.mp4" title="Title"></video>
+
+`Video Link`: https://github.com/HarshSharma20503/CodeJam-v5/blob/main/signup.mp4
 
 #### Screenshots
 
