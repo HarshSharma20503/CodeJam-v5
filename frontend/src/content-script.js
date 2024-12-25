@@ -9,6 +9,7 @@ import {
   getDriveLinks,
 } from "./scripts/drive-utils.js";
 import { downloadFile } from "./scripts/file-utils.js";
+import { getUser } from "./scripts/user-utils.js";
 
 const init = async () => {
   if (document.getElementById("my-extension-root")) return;
@@ -18,86 +19,86 @@ const init = async () => {
   root.id = "my-extension-root";
   document.body.appendChild(root);
 
-  // Create UI elements
-  const statusDiv = createStatusDiv();
-  const button = createButton();
-
-  // get user authentication and details
-
-  const getUser = async () => {
-    try {
-      console.log("getUser function called");
-
-      const response = await chrome.runtime.sendMessage({
-        action: "getUser",
-      });
-
-      if (!response.success) {
-        throw new Error(response.error || "User not found");
-      }
-      console.log("response", response);
-      return response.user;
-    } catch (error) {
-      console.error("Error getting user:", error);
-      return null;
-    }
-  };
-
   // Get user details
   const user = await getUser();
   console.log("user in content script", user);
 
-  // button.addEventListener("click", async () => {
-  //   const anchorTags = getDriveLinks();
-  //   updateStatus(statusDiv, ` Found ${anchorTags.length} files to process`);
+  // Wait for course title to load
 
-  //   console.log(anchorTags);
+  // Only proceed to create and show UI elements if we have both user and course
+  if (user) {
+    // Create UI elements
+    const statusDiv = createStatusDiv();
+    const button = createButton();
 
-  //   // Process files sequentially
-  //   for (let i = 0; i < anchorTags.length; i++) {
-  //     const { href, text } = anchorTags[i];
+    button.addEventListener("click", async () => {
+      const course = document.querySelector(
+        "h1.tNGpbb.YrFhrf-ZoZQ1.YVvGBb"
+      ).innerText;
+      console.log("Course:", course);
+      const anchorTags = getDriveLinks();
+      updateStatus(statusDiv, ` Found ${anchorTags.length} files to process`);
 
-  //     const fileId = getFileId(href);
+      console.log(anchorTags);
 
-  //     console.log("href", href);
-  //     console.log("text", text);
-  //     console.log("fileId", fileId);
+      // Process files sequentially
+      for (let i = 0; i < anchorTags.length; i++) {
+        const { href, text } = anchorTags[i];
 
-  //     if (fileId) {
-  //       updateStatus(
-  //         statusDiv,
-  //         `Processing file ${i + 1} of ${anchorTags.length}: ${text}`
-  //       );
-  //       const downloadUrl = getDownloadLink(fileId);
-  //       console.log("downloadUrl", downloadUrl);
+        const fileId = getFileId(href);
 
-  //       try {
-  //         await downloadFile(downloadUrl, text);
-  //         updateStatus(
-  //           statusDiv,
-  //           `Successfully processed ${i + 1} of ${anchorTags.length} files`
-  //         );
-  //         return;
-  //       } catch (error) {
-  //         updateStatus(
-  //           statusDiv,
-  //           `Error processing file ${i + 1}: ${error.message}`
-  //         );
-  //       }
-  //     }
-  //     break;
-  //   }
+        console.log("href", href);
+        console.log("text", text);
+        console.log("fileId", fileId);
 
-  //   updateStatus(statusDiv, "All files processed");
-  //   setTimeout(() => {
-  //     statusDiv.style.display = "none";
-  //   }, 3000);
-  // });
+        if (fileId) {
+          updateStatus(
+            statusDiv,
+            `Processing file ${i + 1} of ${anchorTags.length}: ${text}`
+          );
+          const downloadUrl = getDownloadLink(fileId);
+          console.log("downloadUrl", downloadUrl);
 
-  // // Append elements to root
-  // root.appendChild(statusDiv);
-  // root.appendChild(button);
+          try {
+            await downloadFile(downloadUrl, text, course);
+            updateStatus(
+              statusDiv,
+              `Successfully processed ${i + 1} of ${anchorTags.length} files`
+            );
+            return;
+          } catch (error) {
+            updateStatus(
+              statusDiv,
+              `Error processing file ${i + 1}: ${error.message}`
+            );
+          }
+        }
+        break;
+      }
+
+      updateStatus(statusDiv, "All files processed");
+      setTimeout(() => {
+        statusDiv.style.display = "none";
+      }, 3000);
+    });
+
+    // Append elements to root only after we have the course
+    root.appendChild(statusDiv);
+    root.appendChild(button);
+  } else {
+    const statusDiv = createStatusDiv();
+    if (!user) {
+      updateStatus(statusDiv, "Login first");
+    } else if (!course) {
+      updateStatus(statusDiv, "Unable to detect course");
+    }
+    root.appendChild(statusDiv);
+  }
 };
 
-// Run initialization
-init();
+// Run initialization when DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}

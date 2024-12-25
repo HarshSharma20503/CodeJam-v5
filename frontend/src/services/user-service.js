@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../config/constants.js";
+import { getToken } from "./utils.js";
 
 export const handleUserRequest = async (request, sender, sendResponse) => {
   try {
@@ -23,15 +24,7 @@ export const getUser = async () => {
   console.log("******** getUser Function ********");
 
   // Get token using the correct key "token"
-  const token = await new Promise((resolve, reject) => {
-    chrome.storage.local.get("token", (result) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError));
-      } else {
-        resolve(result.token);
-      }
-    });
-  });
+  const token = await getToken();
 
   console.log("token", token);
 

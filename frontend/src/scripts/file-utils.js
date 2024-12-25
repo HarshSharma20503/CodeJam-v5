@@ -1,10 +1,11 @@
-export const downloadFile = async (url, filename) => {
+export const downloadFile = async (url, filename, course) => {
   try {
     // Send message to background script to handle download
     const response = await chrome.runtime.sendMessage({
       action: "download",
       url: url,
       filename: filename,
+      course: course,
     });
 
     if (!response.success) {

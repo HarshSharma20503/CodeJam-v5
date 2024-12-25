@@ -1,53 +1,71 @@
 import { AsyncHandler } from "../utils/AsyncHandler.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
+import { uploadToS3 } from "../utils/aws-utils.js";
+import fs from "fs/promises";
+import { Course } from "../models/courseModel.js";
 import { Lecture } from "../models/lectureModel.js";
-
-export const getLecture = AsyncHandler(async (req, res) => {
-  console.log("******** getUserData Function ********");
-  const user = req.user;
-  const batch = user.batch;
-  const branch = user.branch;
-
-  const lectures = await Lecture.find({ batch, branch });
-
-  if (!lectures) {
-    throw new ApiError(404, "lectures not found");
-  }
-
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        user,
-        lectures,
-      },
-      "User data fetched successfully"
-    )
-  );
-});
 
 export const postLecture = AsyncHandler(async (req, res) => {
   console.log("******** postLecture Function ********");
-  const user = req.user;
-  const { lectures, course, link, batch, branch } = req.body;
+  const { batch, branch } = req.user;
 
-  const lecture = await Lecture.create({
-    userId: user._id,
-    lectures,
-    course,
-    link,
-    batch,
-    branch,
+  if (!req.file) {
+    throw new ApiError(400, "No file uploaded");
+  }
+
+  console.log("req.file: ", req.file);
+
+  const objectKey = req.body.course + req.file.originalname;
+
+  const url = await uploadToS3(
+    req.file.path,
+    process.env.AWS_BUCKET_NAME,
+    objectKey
+  );
+
+  let course = await Course.findOne({ name: req.body.course });
+
+  if (!course) {
+    console.log("Course not found, creating new course");
+    course = await Course.create({
+      name: req.body.course,
+      branch,
+      batch,
+    });
+  }
+
+  console.log("Course: ", course);
+
+  let lecture = await Lecture.findOne({
+    name: req.file.originalname,
+    course: course._id,
   });
 
-  return res.status(201).json(
-    new ApiResponse(
-      201,
-      {
-        lecture,
-      },
-      "lecture created successfully"
-    )
-  );
+  if (!lecture) {
+    console.log("Lecture not found, creating new lecture");
+    lecture = await Lecture.create({
+      name: req.file.originalname,
+      course: course._id,
+      link: url,
+      batch,
+      branch,
+    });
+  }
+
+  console.log("Lecture: ", lecture);
+
+  fs.unlink(req.file.path, (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({
+        message: "Error deleting file from server",
+      });
+    }
+    console.log("File deleted from server");
+  });
+
+  return res.status(200).json({
+    message: "File uploaded successfully",
+    filename: req.file.filename,
+  });
 });

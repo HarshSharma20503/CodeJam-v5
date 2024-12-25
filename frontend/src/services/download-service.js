@@ -1,9 +1,10 @@
 import { API_BASE_URL } from "../config/constants.js";
+import { getToken } from "./utils.js";
 
 export const handleDownload = async (request, sender, sendResponse) => {
   try {
     console.log("Processing download request:", request);
-    const { url, filename } = request;
+    const { url, filename, course } = request;
 
     // First fetch the file
     const response = await fetch(url);
@@ -16,7 +17,7 @@ export const handleDownload = async (request, sender, sendResponse) => {
     console.log("File fetched successfully, uploading to server...");
 
     // Upload to server
-    const uploadResult = await uploadToServer(blob, filename);
+    const uploadResult = await uploadToServer(blob, filename, course);
 
     // Send success response
     sendResponse({
@@ -34,15 +35,19 @@ export const handleDownload = async (request, sender, sendResponse) => {
   }
 };
 
-const uploadToServer = async (blob, filename) => {
+const uploadToServer = async (blob, filename, course) => {
   const formData = new FormData();
   formData.append("file", blob, filename);
+  formData.append("course", course);
 
-  const response = await fetch(`${API_BASE_URL}/upload`, {
+  const token = await getToken();
+
+  const response = await fetch(`${API_BASE_URL}/lecture`, {
     method: "POST",
     body: formData,
     headers: {
       Accept: "application/json",
+      Authorization: `Bearer ${token}`,
     },
   });
 
