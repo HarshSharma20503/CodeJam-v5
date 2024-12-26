@@ -22,11 +22,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Optional: Add any other background script initialization here
 console.log("Background script initialized");
 
-chrome.storage.local
-  .remove("token")
-  .then(() => {
-    console.log("Token removed from local storage");
-  })
-  .catch((error) => {
-    console.error("Error removing token from local storage:", error);
-  });
+// chrome.storage.local
+//   .remove("token")
+//   .then(() => {
+//     console.log("Token removed from local storage");
+//   })
+//   .catch((error) => {
+//     console.error("Error removing token from local storage:", error);
+//   });

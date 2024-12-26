@@ -2,6 +2,7 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth";
 import HomePage from "./pages/Homepage";
 import ChatBot from "./pages/Chatbot";
+import Lecture from "./pages/Lecture";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getItem } from "./utils/storage.js";
@@ -94,6 +95,7 @@ const App = () => {
             path="/chatbot"
             element={<PrivateRoute element={<ChatBot />} />}
           />
+          <Route path="/lecture" element={<Lecture />} />
         </Routes>
       </MemoryRouter>
     </div>

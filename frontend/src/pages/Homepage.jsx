@@ -1,5 +1,9 @@
 import { GetApiCall } from "../utils/apiCall";
-import { useEffect, useState } from "react";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { useEffect, useState, useContext } from "react";
+import { UserContext } from "../context/userContext";
+import { useNavigate } from "react-router-dom";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const Homepage = () => {
   const [data, setData] = useState(null);
@@ -7,10 +11,15 @@ const Homepage = () => {
   const [error, setError] = useState(null);
   const [courses, setCourses] = useState([]);
 
+  const { user, setUser, setSelectedCourse } = useContext(UserContext);
+
+  const navigate = useNavigate();
+
   const fetchData = async () => {
     try {
       const response = await GetApiCall("http://localhost:8000/api/user/");
       console.log("getUser response", response);
+      setUser(response.data.user);
       setCourses(response.data.courses);
       setData(response);
     } catch (err) {
@@ -26,8 +35,36 @@ const Homepage = () => {
 
   if (loading) {
     return (
-      <div className="h-screen bg-slate-700 flex items-center justify-center">
-        Loading...
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white font-sans">
+        <div className="w-[400px] h-[600px] bg-gradient-to-b from-[#1e1e2f] via-[#302b63] to-[#24243e] shadow-lg flex flex-col overflow-hidden">
+          {/* Header Section */}
+          <div className="flex items-center gap-4 p-4 bg-[#302b63] text-white border-b border-white/20">
+            <i className="ri-arrow-left-line text-lg cursor-pointer text-gray-300 transition-colors duration-300 hover:text-yellow-500"></i>
+            <h1 className="text-lg font-semibold m-0">Your Classrooms</h1>
+          </div>
+
+          {/* Classroom List Section */}
+          <div className="flex-1 p-5 overflow-y-auto space-y-5">
+            {[...Array(5)].map((_, index) => (
+              <div
+                key={index}
+                className="h-12 flex  items-center bg-transparent  rounded-lg "
+              >
+                <SkeletonTheme
+                  baseColor="#1e1e2f"
+                  highlightColor="#302b63"
+                  width="355px"
+                  height="48px"
+                >
+                  <Skeleton
+                    containerClassName="rounded-lg shadow-md"
+                    borderRadius="8px"
+                  />
+                </SkeletonTheme>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -100,6 +137,10 @@ const Homepage = () => {
                 <div
                   key={index}
                   className="h-12 flex items-center px-4 bg-[#302b63] rounded-lg text-white shadow-md transition-transform duration-300 transform hover:scale-105 hover:bg-[#bfad45] hover:text-black"
+                  onClick={() => {
+                    setSelectedCourse(course);
+                    navigate("/lecture");
+                  }}
                 >
                   {course.name}
                 </div>

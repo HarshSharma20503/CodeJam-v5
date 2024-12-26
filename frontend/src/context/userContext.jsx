@@ -6,9 +6,12 @@ const UserContext = createContext();
 // Create a provider component
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider
+      value={{ user, setUser, selectedCourse, setSelectedCourse }}
+    >
       {children}
     </UserContext.Provider>
   );
