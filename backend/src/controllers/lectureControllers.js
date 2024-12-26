@@ -4,6 +4,7 @@ import { uploadToS3 } from "../utils/aws-utils.js";
 import fs from "fs/promises";
 import { Course } from "../models/courseModel.js";
 import { Lecture } from "../models/lectureModel.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 export const postLecture = AsyncHandler(async (req, res) => {
   console.log("******** postLecture Function ********");
@@ -70,4 +71,21 @@ export const postLecture = AsyncHandler(async (req, res) => {
     message: "File uploaded successfully",
     filename: req.file.filename,
   });
+});
+
+export const getLectures = AsyncHandler(async (req, res) => {
+  console.log("******** getLecture Function ********");
+  const { courseId, batch, branch } = req.body;
+
+  console.log("courseId: ", courseId);
+
+  const lectures = await Lecture.find({ course: courseId, batch, branch });
+
+  if (!lectures) {
+    throw new ApiError(404, "No lectures found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, lectures, "Lectures fetched successfully"));
 });

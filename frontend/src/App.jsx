@@ -3,6 +3,7 @@ import Auth from "./pages/Auth";
 import HomePage from "./pages/Homepage";
 import ChatBot from "./pages/Chatbot";
 import Lecture from "./pages/Lecture";
+import Notes from "./pages/Notes";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getItem } from "./utils/storage.js";
@@ -95,7 +96,11 @@ const App = () => {
             path="/chatbot"
             element={<PrivateRoute element={<ChatBot />} />}
           />
-          <Route path="/lecture" element={<Lecture />} />
+          <Route
+            path="/lecture"
+            element={<PrivateRoute element={<Lecture />} />}
+          />
+          <Route path="/notes" element={<PrivateRoute element={<Notes />} />} />
         </Routes>
       </MemoryRouter>
     </div>
