@@ -5,13 +5,18 @@ import { Note } from "../models/noteModel.js";
 
 export const getNote = AsyncHandler(async (req, res) => {
     console.log("******** getnote Function ********");
-    const user = req.user;
-    const note = await Note.find({ userId: user._id });
+    const { lectureID, userID } = req.body;
+
+    console.log("lectureId: ", lectureID);
+    console.log("userId: ", userID);
+
+    const note = await Note.find({ lectureId: lectureID, userId: userID });
+    console.log("note: ", note);
     
     if (!note) {
         throw new ApiError(404, "note not found"); 
     };
-   
+    
     
     return res.status(200).json(
         new ApiResponse(
@@ -25,39 +30,57 @@ export const getNote = AsyncHandler(async (req, res) => {
 });
 
 export const postNote = AsyncHandler(async (req, res) => {
-    console.log("******** getnote Function ********");
-    const user = req.user;
-    const { notes, lectureId } = req.body;
+    console.log("******** postnote Function ********");
+    const { notess, lectureID, userID } = req.body;
+    
+    console.log("notes: ", notess);
+    console.log("lectureId: ", lectureID);
+    console.log("userId: ", userID);
 
-    const note = await Note.create({ notes, lectureId, userId: user._id });
+    const note = await Note.find({ lectureId: lectureID, userId: userID });
+    if (note.length > 0) {
+        throw new ApiError(400, "Note already exists");
+    }
 
-    if (!note) {
-        throw new ApiError(404, "note not found");  //change this error code??
+    const newNote = new Note({
+        notes: notess,
+        lectureId: lectureID,
+        userId: userID,
+    });
+
+    await newNote.save();
+
+    console.log("note: ", newNote);
+    if (!newNote) {
+        console.log("note not found");
+        throw new ApiError(404, "note not created");  //change this error code??
     }
 
     return res.status(200).json(
         new ApiResponse(
         200,
         {
-            note,
+            newNote,
         },
-        "note added successfully"
+        "notes created successfully"
         )
     );
 });
 
 export const updateNote = AsyncHandler(async (req, res) => {
     console.log("******** updatenote Function ********");
-    const user = req.user;
-    const { notes, lectureId } = req.body;
+    const { notess, lectureID, userID } = req.body;
 
-    const note = await Note.findOneAndUpdate({ userId: user._id, lectureId }, { notes });
-    
-
+    console.log("notes: ", notess);
+    console.log("lectureId: ", lectureID);
+    console.log("userId: ", userID);
+   
+        
+    const note = await Note.findOneAndUpdate({ lectureId: lectureID, userId: userID }, { notes: notess });
+    console.log("note: ", note);
     if (!note) {
-        throw new ApiError(404, "note not found");  //change this error code??
+        throw new ApiError(404, "note not updated");  //change this error code??
     }
-
     return res.status(200).json(
         new ApiResponse(
         200,
@@ -67,28 +90,32 @@ export const updateNote = AsyncHandler(async (req, res) => {
         "note updated successfully"
         )
     );
+      
+    
+
+
 });
 
 
-export const deleteNote = AsyncHandler(async (req, res) => {
-    console.log("******** deletenote Function ********");
-    const user = req.user;
-    const { lectureId } = req.body;
+// export const deleteNote = AsyncHandler(async (req, res) => {
+//     console.log("******** deletenote Function ********");
+//     const user = req.user;
+//     const { lectureId } = req.body;
 
-    const note = await note.findOneAndDelete({ userId: user._id, lectureId });
+//     const note = await note.findOneAndDelete({ userId: user._id, lectureId });
     
     
-    if (!note) {
-        throw new ApiError(404, "note not found");  //change this error code??
-    }
+//     if (!note) {
+//         throw new ApiError(404, "note not found");  //change this error code??
+//     }
 
-    return res.status(200).json(
-        new ApiResponse(
-        200,
-        {
-            note,
-        },
-        "note deleted successfully"
-        )
-    );
-});
+//     return res.status(200).json(
+//         new ApiResponse(
+//         200,
+//         {
+//             note,
+//         },
+//         "note deleted successfully"
+//         )
+//     );
+// });
