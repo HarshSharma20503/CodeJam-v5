@@ -5,6 +5,8 @@ import fs from "fs/promises";
 import { Course } from "../models/courseModel.js";
 import { Lecture } from "../models/lectureModel.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { pptxParser, pdfParser, docxParser } from "../utils/parsers.js";
+import { storeLecture } from "../utils/pinecone.js";
 
 export const postLecture = AsyncHandler(async (req, res) => {
   console.log("******** postLecture Function ********");
@@ -14,10 +16,6 @@ export const postLecture = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "No file uploaded");
   }
 
-  console.log("req.file: ", req.file);
-
-  console.log("req.body:", JSON.stringify(req.body));
-
   const objectKey = req.body.course + req.file.originalname;
 
   const url = await uploadToS3(
@@ -25,6 +23,8 @@ export const postLecture = AsyncHandler(async (req, res) => {
     process.env.AWS_BUCKET_NAME,
     objectKey
   );
+
+  let flag = false;
 
   let course = await Course.findOne({ name: req.body.course });
 
@@ -37,14 +37,13 @@ export const postLecture = AsyncHandler(async (req, res) => {
     });
   }
 
-  console.log("Course: ", course);
-
   let lecture = await Lecture.findOne({
     name: req.file.originalname,
     course: course._id,
   });
 
   if (!lecture) {
+    flag = true;
     console.log("Lecture not found, creating new lecture");
     lecture = await Lecture.create({
       name: req.file.originalname,
@@ -54,8 +53,36 @@ export const postLecture = AsyncHandler(async (req, res) => {
       branch,
     });
   }
+  const fileExtension = req.file.originalname.split(".").pop().toLowerCase();
 
-  console.log("Lecture: ", lecture);
+  if (!flag) {
+    return res.status(200).json({
+      message: "File uploaded successfully",
+      filename: req.file.filename,
+    });
+  }
+
+  let fileContent = "";
+  try {
+    switch (fileExtension) {
+      case "pptx":
+        fileContent = await pptxParser(req.file.path);
+        break;
+      case "pdf":
+        fileContent = await pdfParser(req.file.path);
+        break;
+      case "docx":
+        fileContent = await docxParser(req.file.path);
+        break;
+    }
+  } catch (error) {
+    throw new ApiError(500, "Error parsing file content");
+  }
+
+  if (fileContent !== "") {
+    console.log("File content: ", fileContent);
+    await storeLecture(fileContent, lecture._id, lecture.name);
+  }
 
   fs.unlink(req.file.path, (err) => {
     if (err) {
@@ -64,7 +91,6 @@ export const postLecture = AsyncHandler(async (req, res) => {
         message: "Error deleting file from server",
       });
     }
-    console.log("File deleted from server");
   });
 
   return res.status(200).json({
