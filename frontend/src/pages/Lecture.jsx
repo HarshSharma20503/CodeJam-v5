@@ -217,6 +217,7 @@ const Classroom = () => {
                 size={16}
                 className="hover:scale-150 transition-transform cursor-pointer"
                 onClick={() => {
+                  console.log("lecture", lecture);
                   setSelectedLecture(lecture);
                   navigate("/chatbot");
                 }}
