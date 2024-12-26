@@ -6,6 +6,7 @@ import LectureRoute from "./routes/lectureRoutes.js";
 import NoteRouter from "./routes/noteRoutes.js";
 import tagRotuer from "./routes/tagRoutes.js";
 import chatRouter from "./routes/chatRoutes.js";
+import chatBotRouter from "./routes/chatBotRoutes.js";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/lecture", LectureRoute);
 
 app.use("/api/note", NoteRouter);
 app.use("/api/tag", tagRotuer);
-app.use("api/chat", chatRouter);
+app.use("/api/chats", chatRouter);
+app.use("/api/chatbot", chatBotRouter);
 
 export default app;
