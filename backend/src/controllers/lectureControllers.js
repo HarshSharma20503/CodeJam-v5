@@ -24,6 +24,8 @@ export const postLecture = AsyncHandler(async (req, res) => {
     objectKey
   );
 
+  let flag = false;
+
   let course = await Course.findOne({ name: req.body.course });
 
   if (!course) {
@@ -41,6 +43,7 @@ export const postLecture = AsyncHandler(async (req, res) => {
   });
 
   if (!lecture) {
+    flag = true;
     console.log("Lecture not found, creating new lecture");
     lecture = await Lecture.create({
       name: req.file.originalname,
@@ -51,6 +54,13 @@ export const postLecture = AsyncHandler(async (req, res) => {
     });
   }
   const fileExtension = req.file.originalname.split(".").pop().toLowerCase();
+
+  if (!flag) {
+    return res.status(200).json({
+      message: "File uploaded successfully",
+      filename: req.file.filename,
+    });
+  }
 
   let fileContent = "";
   try {
@@ -64,8 +74,6 @@ export const postLecture = AsyncHandler(async (req, res) => {
       case "docx":
         fileContent = await docxParser(req.file.path);
         break;
-      default:
-        throw new ApiError(400, "Unsupported file format");
     }
   } catch (error) {
     throw new ApiError(500, "Error parsing file content");

@@ -263,7 +263,7 @@ const Classroom = () => {
           <div className="pt-0 p-6 overflow-auto flex-1">
             {/* Feature List with Active Lectures Tab */}
 
-            <div className="flex items-center p-4 bg-[#302b63] rounded-lg shadow-inner mb-2">
+            <div className="flex items-center p-4 bg-[#302b63] rounded-lg shadow-inner">
               <div className="w-1/3 flex flex-row items-center justify-around cursor-pointer text-[#ffd700]">
                 <p className="m-0 mx-1">Lectures</p>
                 <p className="m-0 mx-1">|</p>
@@ -330,9 +330,9 @@ const Classroom = () => {
           </div>
 
           {/* Main Content */}
-          <div className="p-6 overflow-auto flex-1">
+          <div className="pt-0 p-6 overflow-auto flex-1">
             {/* Feature List */}
-            <div className="flex items-center p-4 bg-[#302b63] rounded-lg shadow-inner mb-6">
+            <div className="flex items-center p-4 bg-[#302b63] rounded-lg shadow-inner">
               <div
                 className={`w-1/3 flex flex-row items-center justify-around cursor-pointer ${
                   activeTab === "lectures"
