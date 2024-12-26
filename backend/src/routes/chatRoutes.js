@@ -5,8 +5,8 @@ import { validateToken } from "../middleware/validateToken.js";
 const router = Router();
 
 router.route("/get").get(validateToken, getChat);
-router.route("/post").get(validateToken, postChat);
-router.route("/update").get(validateToken, updateChat);
-router.route("/delete").get(validateToken, deleteChat);
+router.route("/").post(validateToken, postChat);
+router.route("/").put(validateToken, updateChat);
+router.route("/").delete(validateToken, deleteChat);
 
 export default router;
