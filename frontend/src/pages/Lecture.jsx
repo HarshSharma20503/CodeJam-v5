@@ -10,12 +10,14 @@ import { UserContext } from "../context/userContext";
 import { useNavigate } from "react-router-dom";
 import { PostApiCall } from "../utils/apiCall";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import Example from "../components/Modal";
 
 const Classroom = () => {
   const [activeTab, setActiveTab] = useState("lectures");
   const [showFilter, setShowFilter] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(null);
   const [lectures, setLectures] = useState([]);
+  const [allTags, setAllTags] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +52,23 @@ const Classroom = () => {
       navigate("/home");
     }
     fetchLectures();
+    fetchTags();
   }, []);
+
+  const fetchTags = async () => {
+    try {
+      const response = await PostApiCall(
+        "http://localhost:8000/api/tag/getTags",
+        {
+          userID: user._id,
+        }
+      );
+      setAllTags(response.data.tag);
+      console.log("getTags response", response);
+    } catch (err) {
+      console.log("getTags error", err);
+    }
+  };
 
   const clearContent = () => {
     setShowFilter(false);
@@ -90,13 +108,17 @@ const Classroom = () => {
     );
   };
 
+  const noTagsAdded = () => {
+    return;
+  };
+
   const renderOptionsMenu = (index, url) => {
     if (showOptionsMenu !== index) return null;
 
     return (
       <div className="absolute right-0 top-6 rounded-lg w-40 bg-gray-300 shadow-lg z-50">
         <p className="px-4 py-2 text-black hover:bg-gray-400 cursor-pointer transition-colors">
-          Tags
+          <Example />
         </p>
         <a href={url} download>
           <p className="px-4 py-2 text-black hover:bg-gray-400 cursor-pointer transition-colors">

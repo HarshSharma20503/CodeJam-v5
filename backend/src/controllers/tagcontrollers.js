@@ -5,21 +5,26 @@ import { Tag } from "../models/tagModel.js";
 
 export const getTag = AsyncHandler(async (req, res) => {
     console.log("******** getTag Function ********");
-    const user = req.user;
-    const tags = await Tag.find({ userId: user._id });
+    const { userID } = req.body;
+
     
-    if (!tags) {
-        throw new ApiError(404, "Tag not found"); 
+    console.log("userId: ", userID);
+
+    const tag = await Tag.find({ userId: userID });
+    console.log("tag: ", tag);
+    
+    if (!tag) {
+        throw new ApiError(404, "tag not found"); 
     };
-   
+    
     
     return res.status(200).json(
         new ApiResponse(
         200,
         {
-            tags,
+            tag,
         },
-        "Tag fetched successfully"
+        "tag fetched successfully"
         )
     );
 });
@@ -69,26 +74,3 @@ export const updateTag = AsyncHandler(async (req, res) => {
     );
 });
 
-
-export const deleteTag = AsyncHandler(async (req, res) => {
-    console.log("******** deleteTag Function ********");
-    const user = req.user;
-    const { lectureId } = req.body;
-
-    const tags = await Tag.findOneAndDelete({ userId: user._id, lectureId });
-    
-    
-    if (!tags) {
-        throw new ApiError(404, "Tag not found");  //change this error code??
-    }
-
-    return res.status(200).json(
-        new ApiResponse(
-        200,
-        {
-            tags,
-        },
-        "Tag deleted successfully"
-        )
-    );
-});
