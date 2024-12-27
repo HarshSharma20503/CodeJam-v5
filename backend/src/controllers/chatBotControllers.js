@@ -26,7 +26,7 @@ export const askAi = AsyncHandler(async (req, res, next) => {
   }
 
   if (chat.length === 0) {
-    chat = Chat.create({
+    chat = await Chat.create({
       userId: req.user._id,
       lectureId,
       messages: [],

@@ -18,10 +18,12 @@ const Chatbot = () => {
 
     const fetchChats = async () => {
       try {
+        console.log("Selected Lecture:", selectedLecture);
         const response = await PostApiCall("http://localhost:8000/api/chats/", {
-          lectureId: selectedLecture?.id,
+          lectureId: selectedLecture?._id,
         });
-        setChats(response.data.chat);
+        console.log("Getting Chats:", response.data);
+        setChats(response.data.chat[0].messages);
       } catch (error) {
         console.error("Error fetching chats:", error);
       }

@@ -4,6 +4,7 @@ import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../context/userContext";
 import { useNavigate } from "react-router-dom";
 import "react-loading-skeleton/dist/skeleton.css";
+import { removeItem } from "../utils/storage.js";
 
 const Homepage = () => {
   const [data, setData] = useState(null);
@@ -11,7 +12,7 @@ const Homepage = () => {
   const [error, setError] = useState(null);
   const [courses, setCourses] = useState([]);
 
-  const { user, setUser, setSelectedCourse } = useContext(UserContext);
+  const { setUser, setSelectedCourse } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -29,6 +30,15 @@ const Homepage = () => {
     }
   };
 
+  const handleLogout = () => {
+    // Clear user data from context
+    setUser(null);
+    // Clear any stored tokens or session data
+    removeItem("token"); // Adjust based on your authentication setup
+    // Navigate to login page
+    navigate("/");
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -38,9 +48,14 @@ const Homepage = () => {
       <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white font-sans">
         <div className="w-[400px] h-[600px] bg-gradient-to-b from-[#1e1e2f] via-[#302b63] to-[#24243e] shadow-lg flex flex-col overflow-hidden">
           {/* Header Section */}
-          <div className="flex items-center gap-4 p-4 bg-[#302b63] text-white border-b border-white/20">
-            <i className="ri-arrow-left-line text-lg cursor-pointer text-gray-300 transition-colors duration-300 hover:text-yellow-500"></i>
+          <div className="flex items-center justify-between p-4 bg-[#302b63] text-white border-b border-white/20">
             <h1 className="text-lg font-semibold m-0">Your Classrooms</h1>
+            <button
+              onClick={handleLogout}
+              className="text-gray-300 hover:text-yellow-500 transition-colors duration-300"
+            >
+              Logout
+            </button>
           </div>
 
           {/* Classroom List Section */}
@@ -48,7 +63,7 @@ const Homepage = () => {
             {[...Array(5)].map((_, index) => (
               <div
                 key={index}
-                className="h-12 flex  items-center bg-transparent  rounded-lg "
+                className="h-12 flex items-center bg-transparent rounded-lg"
               >
                 <SkeletonTheme
                   baseColor="#1e1e2f"
@@ -83,9 +98,14 @@ const Homepage = () => {
       {courses.length === 0 && (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e]">
           <div className="w-[400px] h-[600px] bg-gradient-to-b from-[#1e1e2f] via-[#302b63] to-[#24243e] shadow-lg flex flex-col overflow-hidden">
-            <div className="flex items-center gap-4 p-4 bg-[#302b63] text-white border-b border-white/20">
-              <i className="ri-arrow-left-line text-2xl cursor-pointer text-gray-400 transition-colors duration-300 hover:text-yellow-400"></i>
+            <div className="flex items-center justify-between p-4 bg-[#302b63] text-white border-b border-white/20">
               <h1 className="text-xl font-semibold">Your Classrooms</h1>
+              <button
+                onClick={handleLogout}
+                className="text-gray-400 hover:text-yellow-400 transition-colors duration-300"
+              >
+                Logout
+              </button>
             </div>
             <div className="flex-1 p-6 overflow-y-auto">
               <div className="text-lg text-yellow-400 mb-6 p-4 bg-[#302b63]/30 border border-yellow-400/20 rounded-lg text-center">
@@ -119,16 +139,21 @@ const Homepage = () => {
           </div>
         </div>
       )}
-      {/* Insrtuctions Component End */}
+      {/* Instructions Component End */}
 
       {/* Classrooms Component Start */}
       {courses.length > 0 && (
         <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white font-sans">
           <div className="w-[400px] h-[600px] bg-gradient-to-b from-[#1e1e2f] via-[#302b63] to-[#24243e] shadow-lg flex flex-col overflow-hidden">
             {/* Header Section */}
-            <div className="flex items-center gap-4 p-4 bg-[#302b63] text-white border-b border-white/20">
-              <i className="ri-arrow-left-line text-lg cursor-pointer text-gray-300 transition-colors duration-300 hover:text-yellow-500"></i>
+            <div className="flex items-center justify-between p-4 bg-[#302b63] text-white border-b border-white/20">
               <h1 className="text-lg font-semibold m-0">Your Classrooms</h1>
+              <button
+                onClick={handleLogout}
+                className="text-gray-300 hover:text-yellow-500 transition-colors duration-300"
+              >
+                Logout
+              </button>
             </div>
 
             {/* Classroom List Section */}
@@ -149,7 +174,7 @@ const Homepage = () => {
           </div>
         </div>
       )}
-      {/* Classrooms Component ENd */}
+      {/* Classrooms Component End */}
     </div>
   );
 };
