@@ -1,89 +1,135 @@
 import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
 import { AsyncHandler } from "../utils/AsyncHandler.js";
 import { Chat } from "../models/chatModel.js";
 import pinecone from "../config/pinecone.js";
 import GeminiModel from "../config/gemini.js";
 import { createGeminiPrompt } from "../utils/gemini.js";
+import jwt from "jsonwebtoken";
+import { User } from "../models/userModel.js";
 
 export const askAi = AsyncHandler(async (req, res, next) => {
   console.log("******** askAi Function ********");
-  console.log(req.body);
-  const { prompt, lectureId } = req.body;
+  const { prompt, lectureId, token } = req.query;
+
+  // Verify token
+  let decodedToken;
+
+  if (token.charAt(0) === '"' && token.charAt(token.length - 1) === '"')
+    token = token.slice(1, -1);
+
+  console.log("token", token);
+  try {
+    decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    console.log("error", error);
+  }
+
+  console.log("decodedToken", decodedToken);
+
+  const user = await User.findById(decodedToken?._id).select("-password");
+
+  if (!user) {
+    throw new ApiError(401, "Invalid JWT Token");
+  }
+
+  req.user = user;
 
   if (!prompt || !lectureId) {
     return next(new ApiError(400, "Prompt and lectureId are required"));
   }
 
-  console.log("req.user:", req.user);
+  // Set headers for SSE
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("Access-Control-Allow-Origin", "*");
 
-  let chat = await Chat.find({ userId: req.user._id, lectureId }).limit(5);
+  try {
+    let chat = await Chat.find({ userId: req.user._id, lectureId }).limit(5);
 
-  console.log("Chat:", chat);
-
-  if (!chat) {
-    return next(new ApiError(404, "Chat not found"));
-  }
-
-  if (chat.length === 0) {
-    chat = await Chat.create({
-      userId: req.user._id,
-      lectureId,
-      messages: [],
-    });
-  }
-
-  console.log("Chat:", chat);
-  chat = chat[0];
-
-  chat.messages.push({
-    type: "user",
-    message: prompt,
-  });
-
-  // Corrected Pinecone embedding code
-  const index = pinecone.index("testing"); // Replace with your actual index name
-
-  const embedding = await pinecone.inference.embed(
-    "multilingual-e5-large",
-    [prompt],
-    {
-      inputType: "query",
+    if (chat.length === 0) {
+      chat = await Chat.create({
+        userId: req.user._id,
+        lectureId,
+        messages: [],
+      });
+      chat = [chat];
     }
-  );
 
-  const queryResponse = await index.namespace("example-namespace").query({
-    topK: 3,
-    vector: embedding[0].values,
-    includeValues: false,
-    includeMetadata: true,
-    filter: {
-      lectureId: { $eq: lectureId },
-    },
-  });
+    chat = chat[0];
+    const initialMessage = {
+      type: "user",
+      message: prompt,
+    };
 
-  console.log("Query Response:", queryResponse.matches[0].metadata.text);
+    // Store initial user message
+    chat.messages.push(initialMessage);
 
-  // Send the prompt to the AI model and get the response
-  const recentMessages = chat.messages.map((msg) => msg.message).join("\n");
-  const fullPrompt = createGeminiPrompt(
-    recentMessages,
-    prompt,
-    queryResponse.matches[0].metadata.text
-  );
+    // Get Pinecone embeddings
+    const index = pinecone.index("testing");
+    const embedding = await pinecone.inference.embed(
+      "multilingual-e5-large",
+      [prompt],
+      {
+        inputType: "query",
+      }
+    );
 
-  const response = await GeminiModel.generateContent(fullPrompt);
+    const queryResponse = await index.namespace("example-namespace").query({
+      topK: 3,
+      vector: embedding[0].values,
+      includeValues: false,
+      includeMetadata: true,
+      filter: {
+        lectureId: { $eq: lectureId },
+      },
+    });
 
-  console.log("AI Response:", response.response.text());
+    console.log("Pinecone Query Response:", queryResponse);
 
-  chat.messages.push({
-    type: "ai",
-    message: response.response.text(),
-  });
+    // Prepare the prompt
+    const recentMessages = chat.messages.map((msg) => msg.message).join("\n");
+    const fullPrompt = createGeminiPrompt(
+      recentMessages,
+      prompt,
+      queryResponse.matches[0].metadata.text
+    );
 
-  await chat.save();
+    console.log("Full Prompt:", fullPrompt);
 
-  res
-    .status(200)
-    .json(new ApiResponse(200, { answer: response.response.text() }));
+    // Generate streaming response
+    const response = await GeminiModel.generateContentStream(fullPrompt);
+
+    console.log(response);
+
+    let completeResponse = "";
+
+    // Stream the response
+    for await (const chunk of response.stream) {
+      console.log("Chunk:", chunk);
+      const chunkText = chunk.text(); // Ensure you're using the correct method to get the text
+      completeResponse += chunkText;
+
+      // Send chunk to client
+      res.write(`data: ${JSON.stringify({ chunk: chunkText })}\n\n`);
+    }
+
+    // Save the complete response to database
+    chat.messages.push({
+      type: "ai",
+      message: completeResponse,
+    });
+    await chat.save();
+
+    // Send done event
+    res.write("event: done\ndata: {}\n\n");
+    res.end();
+  } catch (error) {
+    console.error("Streaming Error:", error);
+    // Send error event to client
+    res.write(
+      `event: error\ndata: ${JSON.stringify({ error: error.message })}\n\n`
+    );
+    res.end();
+  }
 });

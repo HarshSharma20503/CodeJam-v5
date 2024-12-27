@@ -1,14 +1,28 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import "remixicon/fonts/remixicon.css";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext";
 import { PostApiCall } from "../utils/apiCall.js";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import MarkdownEditor from "@uiw/react-markdown-editor";
+import { getItem } from "../utils/storage.js";
 
 const Chatbot = () => {
   const [query, setQuery] = useState("");
   const [chats, setChats] = useState([]);
+  const [isStreaming, setIsStreaming] = useState(false);
   const { user, selectedLecture } = useContext(UserContext);
   const navigate = useNavigate();
+  const chatEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chats]);
 
   useEffect(() => {
     if (!user) {
@@ -18,11 +32,9 @@ const Chatbot = () => {
 
     const fetchChats = async () => {
       try {
-        console.log("Selected Lecture:", selectedLecture);
         const response = await PostApiCall("http://localhost:8000/api/chats/", {
           lectureId: selectedLecture?._id,
         });
-        console.log("Getting Chats:", response.data);
         setChats(response.data.chat[0].messages);
       } catch (error) {
         console.error("Error fetching chats:", error);
@@ -36,41 +48,69 @@ const Chatbot = () => {
     setQuery(e.target.value);
   };
 
-  const handleSave = () => {
-    console.log("Query Saved:", query);
+  const handleDelete = () => {
+    // make a post api call to delete the chat
+    const deleteChat = async () => {
+      try {
+        await PostApiCall("http://localhost:8000/api/chats/delete", {
+          lectureId: selectedLecture?._id,
+        });
+        setChats([]);
+      } catch (error) {
+        console.error("Error deleting chat:", error);
+      }
+    };
+    deleteChat();
   };
 
   const handleAsk = async () => {
-    if (!query.trim()) return;
+    if (!query.trim() || isStreaming) return;
 
     try {
-      console.log("Query:", query);
-      console.log("Selected Lecture:", selectedLecture);
-      const response = await PostApiCall(
-        "http://localhost:8000/api/chatbot/ask",
-        {
-          prompt: query,
-          lectureId: selectedLecture?._id,
-        }
+      setIsStreaming(true);
+      const userMessage = { type: "user", message: query };
+      const aiMessage = { type: "ai", message: "" };
+
+      setChats((prev) => [...prev, userMessage, aiMessage]);
+      setQuery("");
+      const token = await getItem("token");
+      // Set up SSE connection
+      const eventSource = new EventSource(
+        `http://localhost:8000/api/chatbot/ask?prompt=${encodeURIComponent(
+          query
+        )}&lectureId=${selectedLecture?._id}&token=${token}`
       );
 
-      console.log("Response:", response.data);
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        setChats((prev) => {
+          const newChats = [...prev];
+          const lastMessage = newChats[newChats.length - 1];
+          lastMessage.message += data.chunk;
+          return newChats;
+        });
+      };
 
-      setChats((prev) => [
-        ...prev,
-        {
-          type: "user",
-          message: query,
-        },
-        {
-          type: "ai",
-          message: response?.data?.answer,
-        },
-      ]);
+      eventSource.onerror = (error) => {
+        console.error("SSE Error:", error);
+        eventSource.close();
+        setIsStreaming(false);
+      };
 
-      setQuery("");
+      eventSource.addEventListener("done", () => {
+        eventSource.close();
+        setIsStreaming(false);
+      });
     } catch (error) {
       console.error("Error sending query:", error);
+      setIsStreaming(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleAsk();
     }
   };
 
@@ -87,7 +127,7 @@ const Chatbot = () => {
             <h2 className="text-md font-semibold m-0">Chatbot</h2>
           </div>
           <button
-            onClick={handleSave}
+            onClick={handleDelete}
             className="absolute top-2 right-4 bg-yellow-400 text-[#000000] rounded-md hover:bg-yellow-500 transition my-2 px-4 py-0"
             style={{
               fontSize: "12px",
@@ -96,7 +136,7 @@ const Chatbot = () => {
               lineHeight: "25px",
             }}
           >
-            Save
+            Delete
           </button>
         </div>
 
@@ -124,10 +164,25 @@ const Chatbot = () => {
                       : "bg-[#302b63] text-white mr-auto"
                   }`}
                 >
-                  {chat.message}
+                  {chat.type === "ai" ? (
+                    <MarkdownEditor.Markdown
+                      source={chat.message || " "}
+                      style={{ background: "transparent", color: "inherit" }}
+                    />
+                  ) : (
+                    chat.message
+                  )}
                 </div>
               </div>
             ))}
+            {isStreaming && (
+              <div className="flex justify-start">
+                <div className="max-w-[80%] px-6 py-1 rounded-lg bg-[#302b63] text-white mr-auto">
+                  Generating response...
+                </div>
+              </div>
+            )}
+            <div ref={chatEndRef} />
           </div>
         </div>
 
@@ -138,14 +193,17 @@ const Chatbot = () => {
               type="text"
               value={query}
               onChange={handleQueryChange}
+              onKeyPress={handleKeyPress}
               placeholder="Type your query..."
-              className="flex-1 p-2 bg-[#302b63] border border-yellow-400 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              disabled={isStreaming}
+              className="flex-1 p-2 bg-[#302b63] border border-yellow-400 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
             />
             <button
               onClick={handleAsk}
-              className="bg-yellow-400 text-[#302b63] rounded-md hover:bg-yellow-500 transition px-4"
+              disabled={isStreaming}
+              className="bg-yellow-400 text-[#302b63] rounded-md hover:bg-yellow-500 transition px-4 disabled:opacity-50"
             >
-              Ask
+              {isStreaming ? "..." : "Ask"}
             </button>
           </div>
         </div>
