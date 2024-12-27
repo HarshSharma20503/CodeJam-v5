@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { UserContext } from "../context/userContext";
 
-const Modal = ({ isOpen, onClose, title, initialTags = [], onTagsUpdate }) => {
+const Modal = ({ isOpen, onClose, title, initialTags, onTagsUpdate }) => {
   const [tags, setTags] = useState(initialTags);
   const [newTag, setNewTag] = useState("");
+
+  const { selectedLectureId } = useContext(UserContext);
 
   // Handle ESC key press
   React.useEffect(() => {
@@ -23,16 +26,22 @@ const Modal = ({ isOpen, onClose, title, initialTags = [], onTagsUpdate }) => {
     e.preventDefault();
     if (newTag.trim() && !tags.includes(newTag.trim())) {
       const updatedTags = [...tags, newTag.trim()];
+      console.log("tags added", updatedTags);
       setTags(updatedTags);
-      onTagsUpdate?.(updatedTags);
       setNewTag("");
     }
   };
 
   const handleRemoveTag = (tagToRemove) => {
     const updatedTags = tags.filter((tag) => tag !== tagToRemove);
+    console.log("tags removed", updatedTags);
     setTags(updatedTags);
-    onTagsUpdate?.(updatedTags);
+  };
+
+  const handleSave = () => {
+    onClose();
+    console.log("tags saved", tags);
+    onTagsUpdate?.(tags, selectedLectureId);
   };
 
   if (!isOpen) return null;
@@ -127,10 +136,10 @@ const Modal = ({ isOpen, onClose, title, initialTags = [], onTagsUpdate }) => {
           {/* Footer Actions */}
           <div className="mt-4 flex justify-end">
             <button
-              onClick={onClose}
+              onClick={handleSave}
               className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
-              Close
+              Save
             </button>
           </div>
         </div>
@@ -139,33 +148,33 @@ const Modal = ({ isOpen, onClose, title, initialTags = [], onTagsUpdate }) => {
   );
 };
 
-// Example usage component
-const Example = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [tags, setTags] = useState(["react", "tailwind", "javascript"]);
+// // Example usage component
+// const Example = () => {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const [tags, setTags] = useState(["react", "tailwind", "javascript"]);
 
-  const handleTagsUpdate = (newTags) => {
-    setTags(newTags);
-  };
+//   const handleTagsUpdate = (newTags) => {
+//     setTags(newTags);
+//   };
 
-  return (
-    <div className="">
-      <button
-        onClick={() => setIsOpen(true)}
-        className="bg-transparent text-black rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-      >
-        Manage Tags
-      </button>
+//   return (
+//     <div className="">
+//       <button
+//         onClick={() => setIsOpen(true)}
+//         className="bg-transparent text-black rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+//       >
+//         Manage Tags
+//       </button>
 
-      <Modal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        title="Manage Tags"
-        initialTags={tags}
-        onTagsUpdate={handleTagsUpdate}
-      />
-    </div>
-  );
-};
+//       <Modal
+//         isOpen={isOpen}
+//         onClose={() => setIsOpen(false)}
+//         title="Manage Tags"
+//         initialTags={tags}
+//         onTagsUpdate={handleTagsUpdate}
+//       />
+//     </div>
+//   );
+// };
 
-export default Example;
+export default Modal;

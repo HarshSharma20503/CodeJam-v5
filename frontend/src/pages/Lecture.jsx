@@ -10,7 +10,8 @@ import { UserContext } from "../context/userContext";
 import { useNavigate } from "react-router-dom";
 import { PostApiCall } from "../utils/apiCall";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-import Example from "../components/Modal";
+import Modal from "../components/Modal";
+import { toast } from "react-toastify";
 
 const Classroom = () => {
   const [activeTab, setActiveTab] = useState("lectures");
@@ -18,10 +19,25 @@ const Classroom = () => {
   const [showOptionsMenu, setShowOptionsMenu] = useState(null);
   const [lectures, setLectures] = useState([]);
   const [allTags, setAllTags] = useState([]);
+  const [tagsGroupedByLecture, setTagsGroupedByLecture] = useState([]);
+  const [update, setUpdate] = useState([]);
 
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false); //for Modal
+  const [selectedFilter, setSelectedFilter] = useState(null); // for filter
+  const [filterId, setFilterId] = useState("676dda2f2e9bba9d072d3b5d");
+  const [initialTagss, setInitialTagss] = useState(["a"]);
+  // const [filterId, setFIlterId] = useState(
+  //   tagsGroupedByLecture.find(group => group.tags.includes(tagName))?.lectureId
+  // );
 
-  const { user, selectedCourse, setSelectedLecture } = useContext(UserContext);
+  const {
+    user,
+    selectedCourse,
+    setSelectedLecture,
+    setSelectedLectureId,
+    selectedLectureId,
+  } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -52,23 +68,100 @@ const Classroom = () => {
       navigate("/home");
     }
     fetchLectures();
-    fetchTags();
+    fetchAllTags();
   }, []);
 
-  const fetchTags = async () => {
+  useEffect(() => {
+    console.log("tagsGroupedByLecture", tagsGroupedByLecture);
+    const tagSet = new Set();
+    const tempAllTags = [];
+
+    for (const lectureSpecificTags of tagsGroupedByLecture) {
+      for (const tag of lectureSpecificTags.tags) {
+        if (!tagSet.has(tag)) {
+          tagSet.add(tag);
+          tempAllTags.push(tag);
+        }
+      }
+    }
+
+    setAllTags(tempAllTags);
+    console.log("allTags", tempAllTags);
+  }, [tagsGroupedByLecture]);
+
+  const fetchAllTags = async () => {
     try {
       const response = await PostApiCall(
-        "http://localhost:8000/api/tag/getTags",
+        "http://localhost:8000/api/tag/getAllTags",
         {
+          courseID: selectedCourse._id,
           userID: user._id,
         }
       );
-      setAllTags(response.data.tag);
-      console.log("getTags response", response);
+      setTagsGroupedByLecture(response.data.groupedByLecture);
+      console.log("getTags response", response.data.groupedByLecture);
     } catch (err) {
       console.log("getTags error", err);
     }
   };
+
+  // useEffect(() => {
+  //   getTagsForLecture(selectedLectureId);
+  // }, [update]);
+
+  const getTagsForLecture = (lectureId) => {
+    const lecture = tagsGroupedByLecture.find(
+      (item) => item.lectureId === lectureId
+    );
+    console.log("lecture in getTagsForLecture", lecture ? lecture.tags : []);
+    // setInitialTagss(lecture ? lecture.tags : []);
+    return lecture ? lecture.tags : []; // Return tags if found, otherwise return an empty array
+  };
+
+  const handleUpdateTags = async (tags, id) => {
+    const tagList = tags;
+    console.log("tagList in handleupdatetags", tagList);
+    console.log("lectureid in handleupdatetags", id);
+
+    try {
+      setLoading(true);
+
+      const response = await PostApiCall("http://localhost:8000/api/tag", {
+        TAGS: tagList,
+        lectureID: id,
+        courseID: selectedCourse._id,
+        userID: user._id,
+      });
+
+      if (response.success) {
+        // Update local state with new notes
+        setUpdate(tagList);
+
+        ////LOOK INTO THIS LATER
+        // You might want to show a success message here
+        toast.success("Tags created successfully");
+      } else {
+        toast.error("Failed to create tags");
+      }
+    } catch (err) {
+      console.error("Create tags error:", err);
+      toast.error("Error creating tags");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const updateFilterId = (newTagName) => {
+      console.log("newTagName", selectedFilter);
+      setFilterId(
+        tagsGroupedByLecture.find((group) => group.tags.includes(newTagName))
+          ?.lectureId
+      );
+      console.log("filterId", filterId);
+    };
+    updateFilterId(selectedFilter);
+  }, [selectedFilter]);
 
   const clearContent = () => {
     setShowFilter(false);
@@ -89,7 +182,7 @@ const Classroom = () => {
 
     const filterOptions =
       activeTab === "lectures"
-        ? ["Filter by Difficulty", "Filter by Pages", "Filter by Dates"]
+        ? allTags
         : activeTab === "assignments"
         ? ["Due", "Missing", "Submitted"]
         : ["Recent", "Important", "All"];
@@ -97,28 +190,41 @@ const Classroom = () => {
     return (
       <div className="absolute top-8 right-0 rounded-lg w-40 bg-gray-300 shadow-lg z-50">
         {filterOptions.map((option, index) => (
-          <p
+          <button
             key={index}
-            className="px-4 py-2 text-black hover:bg-gray-400 cursor-pointer transition-colors"
+            className="w-full text-left px-4 py-2 text-black hover:bg-gray-400 cursor-pointer transition-colors"
+            onClick={() => setSelectedFilter(option)}
           >
             {option}
-          </p>
+          </button>
         ))}
       </div>
     );
   };
 
-  const noTagsAdded = () => {
-    return;
-  };
-
-  const renderOptionsMenu = (index, url) => {
+  const renderOptionsMenu = (index, url, lectureid) => {
     if (showOptionsMenu !== index) return null;
 
     return (
       <div className="absolute right-0 top-6 rounded-lg w-40 bg-gray-300 shadow-lg z-50">
         <p className="px-4 py-2 text-black hover:bg-gray-400 cursor-pointer transition-colors">
-          <Example />
+          <button
+            onClick={() => {
+              setIsOpen(true);
+            }}
+            className="bg-transparent text-black rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Manage Tags
+          </button>
+          {console.log("initialTagss", initialTagss)}
+          {/* {console.log("lectureid", selectedLectureId)} */}
+          <Modal
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            title="Manage Tags"
+            initialTags={getTagsForLecture(lectureid)}
+            onTagsUpdate={handleUpdateTags}
+          />
         </p>
         <a href={url} download>
           <p className="px-4 py-2 text-black hover:bg-gray-400 cursor-pointer transition-colors">
@@ -220,46 +326,52 @@ const Classroom = () => {
           {renderFilterDropdown()}
         </div>
 
-        {lectures.map((lecture, index) => (
-          <div
-            key={index}
-            className="flex justify-between my-4 bg-[#92b3b3] p-1 rounded-lg overflow-visible"
-          >
-            <div className="p-1 w-[70%] rounded-lg">{lecture.name}</div>
-            <div className="relative flex justify-around items-center p-1 w-1/4 bg-[#ffd700] rounded-lg h-5">
-              <NotebookPen
-                size={16}
-                className="hover:scale-150 transition-transform cursor-pointer"
-                onClick={() => {
-                  setSelectedLecture(lecture);
-                  navigate("/notes");
-                }}
-              />
-              <Bot
-                size={16}
-                className="hover:scale-150 transition-transform cursor-pointer"
-                onClick={() => {
-                  console.log("lecture", lecture);
-                  setSelectedLecture(lecture);
-                  navigate("/chatbot");
-                }}
-              />
-              <div className="relative">
-                <MoreVertical
-                  size={16}
-                  className="hover:scale-150 transition-transform cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowOptionsMenu(
-                      showOptionsMenu === index ? null : index
-                    );
-                  }}
-                />
-                {renderOptionsMenu(index, lecture.link)}
+        {console.log(lectures.map((lecture) => lecture._id.toString()))}
+        {console.log("filterId", filterId)}
+        {lectures.map(
+          (lecture, index) =>
+            lecture._id.toString() == filterId && (
+              <div
+                key={index}
+                className="flex justify-between my-4 bg-[#92b3b3] p-1 rounded-lg overflow-visible"
+              >
+                <div className="p-1 w-[70%] rounded-lg">{lecture.name}</div>
+                <div className="relative flex justify-around items-center p-1 w-1/4 bg-[#ffd700] rounded-lg h-5">
+                  <NotebookPen
+                    size={16}
+                    className="hover:scale-150 transition-transform cursor-pointer"
+                    onClick={() => {
+                      setSelectedLecture(lecture);
+                      navigate("/notes");
+                    }}
+                  />
+                  <Bot
+                    size={16}
+                    className="hover:scale-150 transition-transform cursor-pointer"
+                    onClick={() => {
+                      console.log("lecture", lecture);
+                      setSelectedLecture(lecture);
+                      navigate("/chatbot");
+                    }}
+                  />
+                  <div className="relative">
+                    <MoreVertical
+                      size={16}
+                      className="hover:scale-150 transition-transform cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowOptionsMenu(
+                          showOptionsMenu === index ? null : index
+                        );
+                        setSelectedLectureId(lecture._id);
+                      }}
+                    />
+                    {renderOptionsMenu(index, lecture.link, lecture._id)}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            )
+        )}
       </>
     );
   };

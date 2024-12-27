@@ -77,7 +77,9 @@ export const updateNote = AsyncHandler(async (req, res) => {
    
         
     const note = await Note.findOneAndUpdate({ lectureId: lectureID, userId: userID }, { notes: notess });
+
     console.log("note: ", note);
+    
     if (!note) {
         throw new ApiError(404, "note not updated");  //change this error code??
     }
