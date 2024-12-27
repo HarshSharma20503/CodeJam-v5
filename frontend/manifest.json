@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "My React Extension",
+  "name": "Classroom Stalker",
   "version": "1.0.0",
   "description": "Chrome Extension with React",
   "action": {

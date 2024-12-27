@@ -5,6 +5,6 @@ import { validateToken } from "../middleware/validateToken.js";
 
 const router = Router();
 
-router.route("/ask").post(validateToken, askAi);
+router.route("/ask").get(askAi);
 
 export default router;

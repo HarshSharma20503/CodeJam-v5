@@ -6,9 +6,13 @@ export const getChat = AsyncHandler(async (req, res) => {
   console.log("******** getChat Function ********");
   const user = req.user;
   const lectureId = req.body.lectureId;
+
+  console.log("lectureId: ", lectureId);
   const chat = await Chat.find({ userId: user._id, lectureId })
     .sort({ createdAt: -1 })
     .limit(10);
+
+  console.log("chat", chat);
 
   if (!chat) {
     await Chat.create({
@@ -36,4 +40,19 @@ export const getChat = AsyncHandler(async (req, res) => {
       "Chat fetched successfully"
     )
   );
+});
+
+export const deleteChat = AsyncHandler(async (req, res) => {
+  console.log("******** deleteChat Function ********");
+  const user = req.user;
+  const lectureId = req.body.lectureId;
+
+  console.log("lectureId: ", lectureId);
+  const chat = await Chat.findOneAndDelete({ userId: user._id, lectureId });
+
+  console.log("chat", chat);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Chat deleted successfully"));
 });
