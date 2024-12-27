@@ -12,7 +12,8 @@ A Chrome Extension that processes all classroom content and classifies it into l
 - **Express and Node.js**: Backend
 - **MongoDB Atlas**: Database
 - **AWS S3 Bucket**: For storing lectures
-- **Langchain(Expected)**: RAG-based Chatbot using Gemini API
+- **Pinecone**: Vector Database to store context of documents.
+- **Gemini**: `gemini-pro-1.5` model as our ai assistant.
 
 ## Expected Frontend Screens
 
@@ -39,44 +40,30 @@ A Chrome Extension that processes all classroom content and classifies it into l
 
 ## Features
 
-### Features Implemented as of 8:30 PM, 25th of Dec, 2024
+### Features Implemented 
 
 - Signup/Login completed end to end.
 - Able to process the lectures links from the classroom, download them and save them to s3 bucket through server, and store the lectures and course details in the database.
 - Implemented UI components for chatbot and lectures classification Screens.
+- Chatbot implemented, has the context of previous chats and also the lecture uploaded.
 
-#### Demo Videos
+#### Demo Video
 
-`Description of the Video`: Ability of the extension to process and save data to backend and display it on the popup screen of extension.
+`https://www.youtube.com/watch?v=7GPsZ_CkOFE`
 
-**Video Link**: `https://github.com/HarshSharma20503/CodeJam-v5/blob/main/Classroom%20Stalker.mp4`
+### Future Scope
 
-`Description of the Video`: Sign up for first user, only users with `@mail.jiit.ac.in` are allowed. If no course are processed. It wiil show you instructions as to how to process them.
-
-**Video Link**: `https://github.com/HarshSharma20503/CodeJam-v5/blob/main/signup.mp4`
-
-#### Screenshots
-
-`Screenshots of the implemented UI that is yet to be integrated`
-<div style="display: flex; justify-content: space-between;">
-   <img src="image.png" alt="alt text" style="width: 48%;">
-   <img src="image-1.png" alt="alt text" style="width: 48%;">
-</div>
-
-### Features Planned for the hackathon
-
-- Working Chatbot, with whom you can ask doubts about your lecture that you have selected. Save Chats if need be.
-- Filter the lectures according to the tags that you have created. Add tags too obviously.
-- Create and save notes for the lecture you have selected.
-
-### Features that can be added
-
+- Add further multiple document support for photos, videos and other file extension.
 - Notes and can be shared through a link.
 - Rewriting responses and better chatbot UI.
 
 ## Basic Architecure and data flow
 
-![alt text](image-2.png)
+![image](https://github.com/user-attachments/assets/1b5d45b8-fd2d-4760-8cdf-3805e31c6efa)
+
+## PPT Link
+
+`https://docs.google.com/presentation/d/1AdDuOMd7-pPmUYV8chKWzC8zThQCFjqh/edit?usp=sharing&ouid=109962653644267782719&rtpof=true&sd=true`
 
 ## Steps to Run the Project
 
